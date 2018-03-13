@@ -1,31 +1,39 @@
 package sample;
 
+import javax.xml.crypto.Data;
 import java.net.*;
 import java.io.*;
 
 public class ClientConnectHandler implements Runnable{
 
-    private Socket socket;
-    public ClientConnectHandler(Socket socket){
+    private Socket socket = null;
+    private BufferedReader in = null;
+    private PrintWriter out = null;
+
+
+    public ClientConnectHandler(Socket socket) throws IOException{
         this.socket = socket;
+        in = new BufferedReader(
+                new InputStreamReader(socket.getInputStream()));
+        out = new PrintWriter(socket.getOutputStream());
+
     }
 
     @Override
     public void run(){
         try{
-            while(true){
-                // TODO: Setup DIR, Upload, Download
-                PrintWriter out = new PrintWriter(socket.getOutputStream());
-                out.println("Hey, You've connected");
-            }
-        } catch (IOException e){
+            // TODO: Setup DIR, Upload, Download
+            out.println("Hey, You've connected, we're going to send you the list of files");
+            out.flush();
+        } catch (Exception e){
             e.printStackTrace();
         } finally {
             try {
-                if (socket != null){
-                    socket.close();
-                }
-            } catch (Exception e){
+                in.close();
+                out.close();
+                socket.close();
+            } catch (IOException e){
+                System.err.println("Error");
                 e.printStackTrace();
             }
         }

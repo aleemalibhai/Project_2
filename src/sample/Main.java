@@ -1,72 +1,94 @@
 package sample;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.scene.control.*;
 
-import java.io.File;
+
+
+import java.awt.*;
+import java.net.*;
+import java.io.*;
 
 public class Main extends Application {
 
-    private Button btn1;
-    private Button btn2;
-    public String path = "";
-
-
-    public ObservableList<File> getLocalFiles(String folderPath){
-        File folder = new File(folderPath);
-        ObservableList<File> files = FXCollections.observableArrayList();
-        for (File file : folder.listFiles()){
-            files.add(file);
-        }
-
-        return files;
-    }
-
-    @Override
-    public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        primaryStage.setTitle("Project 2");
-
-        // main display
-        BorderPane layout = new BorderPane();
-        layout.setPadding(new Insets(10));
-
-        //gridpane for the two List views
-        GridPane tables = new GridPane();
-        tables.setPadding(new Insets(10));
-
-        // Client List
-        ListView<File> list1 = new ListView<>(getLocalFiles(path));
-
-        // gridpane for the upload download button
-        GridPane upDown = new GridPane();
-        // upload/download buttons
-        btn1 = new Button("Download");
-        btn2 = new Button("Upload");
-        upDown.add(btn1,0,0);
-        upDown.add(btn2,1,0);
-
-        layout.setTop(upDown);
-
-
-
-
-        primaryStage.setScene(new Scene(root, 300, 275));
-        primaryStage.show();
-    }
+    private TextField _text1;
+    private TextField _text2;
+    private Button _btn1;
 
 
     public static void main(String[] args) {
-        launch(args);
+        Application.launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        primaryStage.setTitle("Server Joiner");
+
+        BorderPane layout = new BorderPane();
+        GridPane gp = new GridPane();
+        gp.setPadding(new Insets(10,10,10,10));
+        layout.setPadding(new Insets(10));
+
+
+        Label serverIP = new Label("Server IP");
+        _text1 = new TextField();
+        gp.add(serverIP, 0, 0);
+        gp.add(_text1, 1, 0);
+        _text1.setPromptText("Enter server IP");
+
+        Label serverPort = new Label("Server Port: ");
+        _text2 = new TextField();
+        gp.add(serverPort, 0, 1);
+        gp.add(_text2, 1, 1);
+        _text1.setPromptText("Enter server Port");
+
+
+        _btn1 = new Button("Submit");
+        _btn1.setPadding(new Insets(10));
+        gp.setHgap(10);
+        gp.setVgap(10);
+        layout.setLeft(gp);
+        layout.setBottom(_btn1);
+        layout.setAlignment(_btn1, Pos.BOTTOM_RIGHT);
+
+
+        _btn1.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                try {
+                    int port = Integer.parseInt(_text2.getText());
+                    String address = _text1.getText();
+                    System.out.println(address);
+                    Server.runServer(port);
+                    Socket socket = new Socket(address, port);
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(socket.getInputStream()));
+                    String line;
+                    while ((line = in.readLine()) != null){
+                        System.out.println(line);
+                    }
+                    socket.close();
+                } catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+
+        });
+
+        primaryStage.setScene(new Scene(layout, 300, 275));
+        primaryStage.show();
     }
 }

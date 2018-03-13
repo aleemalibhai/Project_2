@@ -5,16 +5,27 @@ import java.io.*;
 
 public class Server {
 
-    public void runServer(int port) throws IOException{
+    private ServerSocket serverSocket = null;
 
-        ServerSocket serverSocket = new ServerSocket(port);
+    Server (int port) throws IOException{
+        serverSocket = new ServerSocket(port);
+    }
+
+    public void requests() throws IOException{
         System.out.println("Server is Up, Listening for connections");
-
-        while (true){
-            Socket socket = serverSocket.accept();
-            Thread thread = new Thread(new ClientConnectHandler(socket));
-            thread.start();
+        try {
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                ClientConnectHandler handler = new ClientConnectHandler(clientSocket);
+                Thread thread = new Thread(handler);
+                thread.start();
+            }
+        } catch (IOException e){
+            try{
+                serverSocket.close();
+            } catch (IOException e1){
+                e1.printStackTrace();
+            }
         }
-
     }
 }
