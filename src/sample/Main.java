@@ -10,7 +10,9 @@ import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
@@ -22,11 +24,14 @@ public class Main extends Application {
 
     private Button btn1;
     private Button btn2;
+    private Button btn3;
+    private TextField _address;
+    private TextField _port;
     private ObservableList<String> fileNames;
     private ArrayList<File> files;
     public String path = "/home/aleem/Documents/2020/Project_2/Client";
     private File fileToUpload;
-    private File fileToDownload;
+    private String fileToDownload;
 
     // populates observable list from folder
     public ObservableList<String> getLocalFiles(String folderPath){
@@ -68,23 +73,57 @@ public class Main extends Application {
         // borderpane for the upload download button
         BorderPane upDown = new BorderPane();
         // upload/download buttons
-        btn1 = new Button("Download");
-        btn2 = new Button("Upload");
+        btn1 = new Button("Upload");
+        btn2 = new Button("Download");
         upDown.setLeft(btn1);
         upDown.setRight(btn2);
-
         layout.setTop(upDown);
+
+        //server port and address bars
+        BorderPane bottom = new BorderPane();
+        GridPane APPane = new GridPane();
+        btn3 = new Button("Connect");
+        _address = new TextField();
+        _address.setPromptText("Address");
+
+        _port = new TextField();
+        _port.setPromptText("Port");
+
+        APPane.add(_address,0,0);
+        APPane.add(_port,0,1);
+        APPane.add(btn3,0,2);
+
+        bottom.setRight(APPane);
+        layout.setBottom(bottom);
+
 
         primaryStage.setScene(new Scene(layout, 500, 200));
         primaryStage.show();
 
 
         // buttons
+        // upload
         btn1.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                fileToDownload = files.get(list2.getSelectionModel().getSelectedIndex());
-                // download(fileToDownload)
+                fileToUpload = files.get(list1.getSelectionModel().getSelectedIndex());
+                // TODO upload(fileToUpload)
+            }
+        });
+        //download
+        btn2.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                fileToDownload = list2.getSelectionModel().getSelectedItem();
+                // TODO download(fileToUpload)
+            }
+        });
+
+        // connect to port
+        btn3.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                // TODO implement conection
             }
         });
     }
