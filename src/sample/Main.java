@@ -1,94 +1,96 @@
 package sample;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import javafx.scene.control.*;
 
-
-
-import java.awt.*;
-import java.net.*;
-import java.io.*;
+import java.io.File;
+import java.util.ArrayList;
 
 public class Main extends Application {
 
-    private TextField _text1;
-    private TextField _text2;
-    private Button _btn1;
+    private Button btn1;
+    private Button btn2;
+    private ObservableList<String> fileNames;
+    private ArrayList<File> files;
+    public String path = "/home/aleem/Documents/2020/Project_2/Client";
+    private File fileToUpload;
+    private File fileToDownload;
 
+    // populates observable list from folder
+    public ObservableList<String> getLocalFiles(String folderPath){
+        File folder = new File(folderPath);
+        this.files = new ArrayList<>();
+        this.fileNames = FXCollections.observableArrayList();
 
-    public static void main(String[] args) {
-        Application.launch(args);
+        for (File file : folder.listFiles()){
+            this.files.add(file);
+            this.fileNames.add(file.getName());
+        }
+        return this.fileNames;
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
-        primaryStage.setTitle("Server Joiner");
+    public void start(Stage primaryStage) throws Exception{
+        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
+        primaryStage.setTitle("Project 2");
 
+        // main display
         BorderPane layout = new BorderPane();
-        GridPane gp = new GridPane();
-        gp.setPadding(new Insets(10,10,10,10));
         layout.setPadding(new Insets(10));
 
+        //gridpane for the two List views
+        GridPane tables = new GridPane();
+        tables.setPadding(new Insets(10));
+        tables.setHgap(5);
 
-        Label serverIP = new Label("Server IP");
-        _text1 = new TextField();
-        gp.add(serverIP, 0, 0);
-        gp.add(_text1, 1, 0);
-        _text1.setPromptText("Enter server IP");
-
-        Label serverPort = new Label("Server Port: ");
-        _text2 = new TextField();
-        gp.add(serverPort, 0, 1);
-        gp.add(_text2, 1, 1);
-        _text1.setPromptText("Enter server Port");
-
-
-        _btn1 = new Button("Submit");
-        _btn1.setPadding(new Insets(10));
-        gp.setHgap(10);
-        gp.setVgap(10);
-        layout.setLeft(gp);
-        layout.setBottom(_btn1);
-        layout.setAlignment(_btn1, Pos.BOTTOM_RIGHT);
+        // Client List
+        ListView<String> list1 = new ListView<>(getLocalFiles(path));
+        tables.add(list1,0,0);
+        // Server list
+        ListView<String> list2 = new ListView<>(getLocalFiles(path));
+        tables.add(list2,1,0);
+        //add list to layout
+        layout.setCenter(tables);
 
 
-        _btn1.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                try {
-                    int port = Integer.parseInt(_text2.getText());
-                    String address = _text1.getText();
-                    System.out.println(address);
-                    Server.runServer(port);
-                    Socket socket = new Socket(address, port);
-                    BufferedReader in = new BufferedReader(
-                            new InputStreamReader(socket.getInputStream()));
-                    String line;
-                    while ((line = in.readLine()) != null){
-                        System.out.println(line);
-                    }
-                    socket.close();
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
-            }
+        // borderpane for the upload download button
+        BorderPane upDown = new BorderPane();
+        // upload/download buttons
+        btn1 = new Button("Download");
+        btn2 = new Button("Upload");
+        upDown.setLeft(btn1);
+        upDown.setRight(btn2);
 
-        });
+        layout.setTop(upDown);
 
-        primaryStage.setScene(new Scene(layout, 300, 275));
+        primaryStage.setScene(new Scene(layout, 500, 200));
         primaryStage.show();
+
+
+        // buttons
+        btn1.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                fileToDownload = files.get(list2.getSelectionModel().getSelectedIndex());
+                // download(fileToDownload)
+            }
+        });
+    }
+
+
+    public static void main(String[] args) {
+        launch(args);
     }
 }
