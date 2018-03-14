@@ -166,7 +166,9 @@ public class Main extends Application {
                         System.out.println(line);
                     }
                     objectIn = new ObjectInputStream(socket.getInputStream());
-                    list2 = new ListView<>(objectIn.readObject());
+                    String files = (String) objectIn.readObject();
+                    list2 = new ListView<String>(files);
+                    tables.add(list2,1,0);
                     socket.close();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -186,21 +188,14 @@ public class Main extends Application {
                     _path.setText("");
                     _path.setText("You didn't select a file path");
                     list1 = new ListView<>();
-                    // temporary
-                    list2 = new ListView<>();
                 } else {
                     _path.setText("");
                     _path.setText(file.getPath());
                     path = file.getPath().toString();
                     list1 = new ListView<>(getLocalFiles(path));
-                    // temporary
                 }
                 // Client Lists
                 tables.add(list1,0,0);
-
-                // TODO: Set this in Connection
-                // Server list
-                tables.add(list2,1,0);
             }
         });
     }
