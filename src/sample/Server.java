@@ -5,7 +5,7 @@ import java.io.*;
 
 public class Server implements Runnable{
 
-    private ServerSocket serverSocket = null;
+    private ServerSocket serverSocket;
 
     Server(int port) throws IOException {
         serverSocket = new ServerSocket(port);
