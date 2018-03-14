@@ -3,25 +3,31 @@ package sample;
 import java.net.*;
 import java.io.*;
 
-public class Server {
-    // Hi
+public class Server implements Runnable{
+
     private ServerSocket serverSocket = null;
 
-    Server (int port) throws IOException{
+    Server(int port) throws IOException {
         serverSocket = new ServerSocket(port);
     }
 
-    public void requests() throws IOException{
+    @Override
+    public void run() {
         System.out.println("Server is Up, Listening for connections");
         try {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                ClientConnectHandler handler = new ClientConnectHandler(clientSocket);
-                Thread thread = new Thread(handler);
-                thread.start();
+                try {
+                    ClientConnectHandler handler = new ClientConnectHandler(clientSocket);
+                    Thread thread = new Thread(handler);
+                    thread.start();
+                    serverSocket.close();
+                } catch (IOException e){
+                    clientSocket.close();
+                }
             }
         } catch (IOException e){
-            try{
+            try {
                 serverSocket.close();
             } catch (IOException e1){
                 e1.printStackTrace();
@@ -29,3 +35,6 @@ public class Server {
         }
     }
 }
+
+
+
