@@ -34,6 +34,7 @@ public class Main extends Application {
     private TextField _path;
     private ObservableList<String> fileNames = null;
     private ArrayList<File> files;
+    private ArrayList<String> serverFiles;
     public String path = null;
     private ListView<String> list1 = new ListView<>();
     private ListView<String> list2 = new ListView<>();
@@ -166,9 +167,14 @@ public class Main extends Application {
                         System.out.println(line);
                     }
                     objectIn = new ObjectInputStream(socket.getInputStream());
-                    String files = (String) objectIn.readObject();
-                    list2 = new ListView<String>(files);
+                    try {
+                        serverFiles = new ArrayList<>((ArrayList<String>)objectIn.readObject());
+                    } catch (Exception e1){
+                        e1.printStackTrace();
+                    }
+                    list2 = new ListView<>(FXCollections.observableArrayList(serverFiles));
                     tables.add(list2,1,0);
+                    objectIn.close();
                     socket.close();
                 } catch (IOException e) {
                     e.printStackTrace();

@@ -12,9 +12,7 @@ public class ClientConnectHandler implements Runnable{
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
-    private ObjectOutputStream objectOut;
     private ObjectInputStream objectIn;
-    private ObservableList<String> serverFileNames;
     private String path = "/home/taabish/Desktop/Project_2/Server";
 
 
@@ -23,8 +21,6 @@ public class ClientConnectHandler implements Runnable{
         in = new BufferedReader(
                 new InputStreamReader(socket.getInputStream()));
         out = new PrintWriter(socket.getOutputStream());
-        objectOut = new ObjectOutputStream(socket.getOutputStream());
-
     }
 
     @Override
@@ -35,8 +31,7 @@ public class ClientConnectHandler implements Runnable{
             out.flush();
 
             String selection = "";
-            serverFileNames = new SerializizableFile(path).getLocalFiles();
-            objectOut.writeObject(serverFileNames);
+            new SerializableFile(path, this.socket).sendFiles();
 
             switch(selection) {
                 case "Upload":
