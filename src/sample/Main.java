@@ -36,7 +36,7 @@ public class Main extends Application {
     private TextField _path;
     private ObservableList<String> fileNames = null;
     private ArrayList<File> files;
-    public String path = "/home/taabish/Desktop/Project_2/Client";
+    public String path = null;
     private ListView<String> list1 = new ListView<>();
     private ListView<String> list2 = new ListView<>();
     private File fileToUpload;
@@ -99,8 +99,7 @@ public class Main extends Application {
         APPane.add(_address,0,0);
         APPane.add(_port,0,1);
         APPane.add(btn3,0,2);
-        APPane.setVgap(10);
-        APPane.setHgap(10);
+        APPane.setVgap(5);
 
         // Adding path button and text field
         GridPane left = new GridPane();
@@ -149,7 +148,22 @@ public class Main extends Application {
             @Override
             public void handle(ActionEvent event) {
                 // TODO implement connection
-                connection();
+                try {
+                    int port = Integer.parseInt(_port.getText());
+                    String address = _address.getText();
+                    System.out.println(address);
+                    new Thread(new Server(port)).start();
+                    Socket socket = new Socket(address, port);
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(socket.getInputStream()));
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -183,25 +197,6 @@ public class Main extends Application {
                 tables.add(list2,1,0);
             }
         });
-    }
-
-    public void connection(){
-        try {
-            int port = Integer.parseInt(_port.getText());
-            String address = _address.getText();
-            System.out.println(address);
-            new Thread(new Server(port)).start();
-            Socket socket = new Socket(address, port);
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream()));
-            String line;
-            while ((line = in.readLine()) != null) {
-                System.out.println(line);
-            }
-            socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
 
