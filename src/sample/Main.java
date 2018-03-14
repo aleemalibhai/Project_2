@@ -19,10 +19,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.stage.DirectoryChooser;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -42,6 +39,8 @@ public class Main extends Application {
     private ListView<String> list2 = new ListView<>();
     private File fileToUpload;
     private String fileToDownload;
+    private ObjectInputStream objectIn;
+
 
     // populates observable list from folder
     public ObservableList<String> getLocalFiles(String folderPath){
@@ -166,6 +165,8 @@ public class Main extends Application {
                     while ((line = in.readLine()) != null) {
                         System.out.println(line);
                     }
+                    objectIn = new ObjectInputStream(socket.getInputStream());
+                    list2 = new ListView<>(objectIn.readObject());
                     socket.close();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -193,7 +194,6 @@ public class Main extends Application {
                     path = file.getPath().toString();
                     list1 = new ListView<>(getLocalFiles(path));
                     // temporary
-                    list2 = new ListView<>(getLocalFiles(path));
                 }
                 // Client Lists
                 tables.add(list1,0,0);
