@@ -7,6 +7,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -78,46 +79,51 @@ public class Main extends Application {
 
 
         // borderpane for the upload download button
-        BorderPane upDown = new BorderPane();
+        GridPane topLeft = new GridPane();
         // upload/download buttons
         btn1 = new Button("Upload");
+        btn1.setPadding(new Insets(10, 10, 10, 10));
         btn2 = new Button("Download");
-        upDown.setLeft(btn1);
-        upDown.setRight(btn2);
-        layout.setTop(upDown);
+        btn2.setPadding(new Insets(10, 10, 10, 10));
+        topLeft.add(btn1,1,0);
+        topLeft.add(btn2,0,0);
+        topLeft.setHgap(10);
+        layout.setTop(topLeft);
+        layout.setAlignment(topLeft, Pos.TOP_LEFT);
 
         //server port and address bars
         BorderPane bottom = new BorderPane();
         GridPane APPane = new GridPane();
         btn3 = new Button("Connect");
+        btn3.setPadding(new Insets(10, 10, 10, 10));
         _address = new TextField();
         _address.setPromptText("Address");
 
         _port = new TextField();
         _port.setPromptText("Port");
 
-        APPane.add(_address,0,0);
-        APPane.add(_port,0,1);
-        APPane.add(btn3,0,2);
-        APPane.setVgap(5);
+        APPane.add(_address,1,0);
+        APPane.add(_port,1,1);
+        APPane.add(btn3,0,0);
+        APPane.setHgap(10);
 
         // Adding path button and text field
-        GridPane left = new GridPane();
-        left.setPadding(new Insets(10, 10, 10 ,10));
+        GridPane directoryChooser = new GridPane();
+        directoryChooser.setPadding(new Insets(10, 10, 10 ,10));
 
         _path = new TextField();
-        left.add(_path, 1, 0);
+        directoryChooser.add(_path, 1, 0);
         _path.setMinWidth(300);
         _path.setPromptText("Select the path");
 
         btn4 = new Button("Open File path");
         btn4.setPadding(new Insets(10, 10, 10, 10));
-        left.add(btn4, 0, 0);
+        directoryChooser.add(btn4, 0, 0);
 
-        left.setHgap(10);
-        left.setVgap(10);
+        directoryChooser.setHgap(10);
+        directoryChooser.setVgap(10);
 
-        bottom.setLeft(left);
+        bottom.setLeft(directoryChooser);
         bottom.setRight(APPane);
         layout.setBottom(bottom);
 
