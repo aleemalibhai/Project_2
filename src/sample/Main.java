@@ -16,8 +16,13 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.stage.DirectoryChooser;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
 import java.util.ArrayList;
 
 public class Main extends Application {
@@ -25,11 +30,15 @@ public class Main extends Application {
     private Button btn1;
     private Button btn2;
     private Button btn3;
+    private Button btn4;
     private TextField _address;
     private TextField _port;
-    private ObservableList<String> fileNames;
+    private TextField _path;
+    private ObservableList<String> fileNames = null;
     private ArrayList<File> files;
-    public String path = "/home/aleem/Documents/2020/Project_2/Client";
+    public String path = "/home/taabish/Desktop/Project_2/Client";
+    private ListView<String> list1 = new ListView<>();
+    private ListView<String> list2 = new ListView<>();
     private File fileToUpload;
     private String fileToDownload;
 
@@ -48,7 +57,6 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         primaryStage.setTitle("Project 2");
 
         // main display
@@ -58,13 +66,12 @@ public class Main extends Application {
         //gridpane for the two List views
         GridPane tables = new GridPane();
         tables.setPadding(new Insets(10));
-        tables.setHgap(5);
+        tables.setHgap(10);
+        tables.setVgap(10);
 
-        // Client List
-        ListView<String> list1 = new ListView<>(getLocalFiles(path));
+        // Client Lists
         tables.add(list1,0,0);
         // Server list
-        ListView<String> list2 = new ListView<>(getLocalFiles(path));
         tables.add(list2,1,0);
         //add list to layout
         layout.setCenter(tables);
@@ -92,12 +99,30 @@ public class Main extends Application {
         APPane.add(_address,0,0);
         APPane.add(_port,0,1);
         APPane.add(btn3,0,2);
+        APPane.setVgap(10);
+        APPane.setHgap(10);
 
+        // Adding path button and text field
+        GridPane left = new GridPane();
+        left.setPadding(new Insets(10, 10, 10 ,10));
+
+        _path = new TextField();
+        left.add(_path, 1, 0);
+        _path.setMinWidth(300);
+        _path.setPromptText("Select the path");
+
+        btn4 = new Button("Open File path");
+        btn4.setPadding(new Insets(10, 10, 10, 10));
+        left.add(btn4, 0, 0);
+
+        left.setHgap(10);
+        left.setVgap(10);
+
+        bottom.setLeft(left);
         bottom.setRight(APPane);
         layout.setBottom(bottom);
 
-
-        primaryStage.setScene(new Scene(layout, 500, 200));
+        primaryStage.setScene(new Scene(layout, 750, 500));
         primaryStage.show();
 
 
@@ -123,9 +148,60 @@ public class Main extends Application {
         btn3.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                // TODO implement conection
+                // TODO implement connection
+                connection();
             }
         });
+
+        // directory chooser
+        btn4.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+
+                DirectoryChooser directoryChooser = new DirectoryChooser();
+                directoryChooser.setInitialDirectory(new File("."));
+                File file = directoryChooser.showDialog(primaryStage);
+                if (file == null) {
+                    _path.setText("");
+                    _path.setText("You didn't select a file path");
+                    list1 = new ListView<>();
+                    // temporary
+                    list2 = new ListView<>();
+                } else {
+                    _path.setText("");
+                    _path.setText(file.getPath());
+                    path = file.getPath().toString();
+                    list1 = new ListView<>(getLocalFiles(path));
+                    // temporary
+                    list2 = new ListView<>(getLocalFiles(path));
+                }
+                // Client Lists
+                tables.add(list1,0,0);
+
+                // TODO: Set this in Connection
+                // Server list
+                tables.add(list2,1,0);
+            }
+        });
+    }
+
+    public void connection(){
+        try {
+            int port = Integer.parseInt(_port.getText());
+            String address = _address.getText();
+            System.out.println(address);
+            new Thread(new Server(port)).start();
+            Socket socket = new Socket(address, port);
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream()));
+            String line;
+            while ((line = in.readLine()) != null) {
+                System.out.println(line);
+            }
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
