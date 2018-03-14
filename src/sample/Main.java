@@ -59,6 +59,9 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         primaryStage.setTitle("Project 2");
+        Server startServer = new Server(1200);
+        Thread thread = new Thread(startServer);
+        thread.start();
 
         // main display
         BorderPane layout = new BorderPane();
@@ -145,7 +148,7 @@ public class Main extends Application {
             @Override
             public void handle(ActionEvent event) {
                 fileToDownload = list2.getSelectionModel().getSelectedItem();
-                // TODO download(fileToUpload)
+                // TODO download(fileToDownload)
             }
         });
 
@@ -158,14 +161,7 @@ public class Main extends Application {
                     int port = Integer.parseInt(_port.getText());
                     String address = _address.getText();
                     System.out.println(address);
-                    new Thread(new Server(port)).start();
                     Socket socket = new Socket(address, port);
-                    BufferedReader in = new BufferedReader(
-                            new InputStreamReader(socket.getInputStream()));
-                    String line;
-                    while ((line = in.readLine()) != null) {
-                        System.out.println(line);
-                    }
                     objectIn = new ObjectInputStream(socket.getInputStream());
                     try {
                         serverFiles = new ArrayList<>((ArrayList<String>)objectIn.readObject());
@@ -204,6 +200,7 @@ public class Main extends Application {
                 tables.add(list1,0,0);
             }
         });
+        startServer.closeServer();
     }
 
 

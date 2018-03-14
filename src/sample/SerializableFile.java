@@ -39,6 +39,7 @@ public class SerializableFile implements Serializable{
     public void sendFiles() throws IOException{
         objectOut = new ObjectOutputStream(this.clientSocket.getOutputStream());
         objectOut.writeObject(getServerFiles());
+        objectOut.flush();
         objectOut.close();
     }
 }

@@ -18,18 +18,12 @@ public class ClientConnectHandler implements Runnable{
 
     public ClientConnectHandler(Socket socket) throws IOException{
         this.socket = socket;
-        in = new BufferedReader(
-                new InputStreamReader(socket.getInputStream()));
-        out = new PrintWriter(socket.getOutputStream());
     }
 
     @Override
     public void run(){
         try{
             // TODO: Setup DIR, Upload, Download
-            out.println("Hey, You've connected, we're going to send you the list of files");
-            out.flush();
-
             String selection = "";
             new SerializableFile(path, this.socket).sendFiles();
 
@@ -41,7 +35,6 @@ public class ClientConnectHandler implements Runnable{
                     // TODO Setup Download
                     break;
                 default:
-                    out.println("You didn't select Upload/Download");
                     break;
             }
 
@@ -49,8 +42,6 @@ public class ClientConnectHandler implements Runnable{
             e.printStackTrace();
         } finally {
             try {
-                in.close();
-                out.close();
                 socket.close();
             } catch (IOException e){
                 System.err.println("Error");

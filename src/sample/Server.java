@@ -11,6 +11,14 @@ public class Server implements Runnable{
         serverSocket = new ServerSocket(port);
     }
 
+    public void closeServer(){
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void run() {
         System.out.println("Server is Up, Listening for connections");
@@ -21,17 +29,12 @@ public class Server implements Runnable{
                     ClientConnectHandler handler = new ClientConnectHandler(clientSocket);
                     Thread thread = new Thread(handler);
                     thread.start();
-                    serverSocket.close();
                 } catch (IOException e){
                     clientSocket.close();
                 }
             }
         } catch (IOException e){
-            try {
-                serverSocket.close();
-            } catch (IOException e1){
-                e1.printStackTrace();
-            }
+            //
         }
     }
 }
