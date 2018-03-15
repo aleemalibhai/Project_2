@@ -12,7 +12,6 @@ public class SerializableFile implements Serializable{
     private String path;
     private ArrayList<String> fileNames;
     private Socket clientSocket;
-    private ObjectOutputStream objectOut;
 
     SerializableFile(String path, Socket clientSocket){
         this.path = path;
@@ -34,12 +33,5 @@ public class SerializableFile implements Serializable{
             getFileNames().add(file.getName());
         }
         return getFileNames();
-    }
-
-    public void sendFileNames() throws IOException{
-        objectOut = new ObjectOutputStream(this.clientSocket.getOutputStream());
-        objectOut.writeObject(getServerFiles());
-        objectOut.flush();
-        objectOut.close();
     }
 }

@@ -13,11 +13,13 @@ public class ClientConnectHandler implements Runnable{
     private BufferedReader in;
     private PrintWriter out;
     private ObjectInputStream objectIn;
-    private String path = "/home/aleem/Documents/2020/Project_2/Server";
+    private String path;
+    private ObjectOutputStream objectOut;
 
 
-    public ClientConnectHandler(Socket socket) throws IOException{
+    public ClientConnectHandler(Socket socket, String path) throws IOException{
         this.socket = socket;
+        this.path = path;
     }
 
     @Override
@@ -26,7 +28,8 @@ public class ClientConnectHandler implements Runnable{
             String selection = "";
 
             // Serializes an array of files name and sends it back to client
-            new SerializableFile(path, this.socket).sendFileNames();
+            sendFileNames();
+
 
             switch(selection) {
                 case "Upload":
@@ -50,4 +53,21 @@ public class ClientConnectHandler implements Runnable{
             }
         }
     }
+    private void sendFileNames() throws IOException{
+        objectOut = new ObjectOutputStream(this.socket.getOutputStream());
+        objectOut.writeObject(new SerializableFile(this.path, this.socket).getServerFiles());
+        objectOut.flush();
+        objectOut.close();
+    }
+
+    private void recieveFiles() throws IOException{
+        // TODO Setup Upload
+    }
+
+    private void sendFiles() throws IOException{
+        // TODO Setup Download
+    }
+
+
+
 }

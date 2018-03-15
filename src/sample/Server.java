@@ -4,9 +4,9 @@ import java.net.*;
 import java.io.*;
 
 public class Server implements Runnable{
-    public static String serverPath;
 
     private ServerSocket serverSocket;
+    public static String serverPath;
 
     Server(int port) throws IOException {
         serverSocket = new ServerSocket(port);
@@ -27,7 +27,7 @@ public class Server implements Runnable{
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 try {
-                    ClientConnectHandler handler = new ClientConnectHandler(clientSocket);
+                    ClientConnectHandler handler = new ClientConnectHandler(clientSocket, serverPath);
                     Thread thread = new Thread(handler);
                     thread.start();
                 } catch (IOException e){
