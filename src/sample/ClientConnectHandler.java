@@ -29,8 +29,8 @@ public class ClientConnectHandler implements Runnable{
             // Serializes an array of files name and sends it back to client
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(socket.getInputStream()));
-            String selection = in.readLine();
-            in.close();
+            selection = in.readLine();
+            socket.shutdownInput();
 
             switch(selection) {
                 case "Upload":
@@ -44,6 +44,7 @@ public class ClientConnectHandler implements Runnable{
                 default:
                     break;
             }
+            socket.close();
 
         } catch (Exception e){
             e.printStackTrace();
@@ -52,7 +53,6 @@ public class ClientConnectHandler implements Runnable{
     private void sendFileNames() throws IOException{
         objectOut = new ObjectOutputStream(this.socket.getOutputStream());
         objectOut.writeObject(new SerializableFile(this.path, this.socket).getServerFiles());
-        objectOut.flush();
         objectOut.close();
     }
 

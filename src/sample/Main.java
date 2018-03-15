@@ -241,11 +241,12 @@ public class Main extends Application {
                     try {
                         System.out.println(address);
                         Socket socket = new Socket(address, port);
-                        objectIn = new ObjectInputStream(socket.getInputStream());
-                        PrintWriter out = new PrintWriter(socket.getOutputStream());
-                        out.println("DIR");
+
+                        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+                        out.write("DIR");
                         out.flush();
-                        out.close();
+                        socket.shutdownOutput();
+                        objectIn = new ObjectInputStream(socket.getInputStream());
                         try {
                             serverFiles = new ArrayList<>((ArrayList<String>)objectIn.readObject());
                         } catch (Exception e1){
