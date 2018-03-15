@@ -13,7 +13,7 @@ public class Server implements Runnable{
 
     public void closeServer(){
         try {
-            serverSocket.close();
+            this.serverSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

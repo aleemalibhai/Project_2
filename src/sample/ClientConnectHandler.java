@@ -23,9 +23,10 @@ public class ClientConnectHandler implements Runnable{
     @Override
     public void run(){
         try{
-            // TODO: Setup DIR, Upload, Download
             String selection = "";
-            new SerializableFile(path, this.socket).sendFiles();
+
+            // Serializes an array of files name and sends it back to client
+            new SerializableFile(path, this.socket).sendFileNames();
 
             switch(selection) {
                 case "Upload":
