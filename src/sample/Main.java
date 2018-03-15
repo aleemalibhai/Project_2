@@ -10,10 +10,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
@@ -29,8 +26,9 @@ public class Main extends Application {
     private Button btn2;
     private Button btn3;
     private Button btn4;
-    private TextField _address;
-    private TextField _port;
+    private String address;
+    private static int port;
+    private static boolean serverCreateCheck = true;
     private TextField _path;
     private ObservableList<String> fileNames = null;
     private ArrayList<File> files;
@@ -41,6 +39,7 @@ public class Main extends Application {
     private File fileToUpload;
     private String fileToDownload;
     private ObjectInputStream objectIn;
+    private static Server startServer;
 
 
     // populates observable list from folder
@@ -58,6 +57,12 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
+        if (serverCreateCheck){
+            new PrelimStage();
+            startServer = new Server(port);
+            Thread thread = new Thread(startServer);
+            thread.start();
+        }
         primaryStage.setTitle("Project 2");
 
         // main display
@@ -93,19 +98,10 @@ public class Main extends Application {
 
         //server port and address bars
         GridPane bottom = new GridPane();
-        GridPane APPane = new GridPane();
         btn3 = new Button("Connect");
         btn3.setMinWidth(75);
         btn3.setPadding(new Insets(10, 10, 10, 10));
-        _address = new TextField();
-        _address.setMinWidth(120);
-        _address.setPromptText("Address");
 
-        APPane.setPadding(new Insets(10));
-        APPane.add(_address,1,0);
-        APPane.add(btn3,0,0);
-        APPane.setHgap(10);
-        APPane.setVgap(10);
 
         // Adding path button and text field
         GridPane directoryChooser = new GridPane();
@@ -125,7 +121,6 @@ public class Main extends Application {
         directoryChooser.setVgap(10);
 
         bottom.add(directoryChooser,0,0);
-        bottom.add(APPane,1,0);
         layout.setBottom(bottom);
 
         primaryStage.setScene(new Scene(layout, 540, 500));
@@ -156,9 +151,8 @@ public class Main extends Application {
             public void handle(ActionEvent event) {
                 // TODO implement connection
                 try {
-                    String address = _address.getText();
                     System.out.println(address);
-                    Socket socket = new Socket(address, 1200);
+                    Socket socket = new Socket(address, port);
                     objectIn = new ObjectInputStream(socket.getInputStream());
                     try {
                         serverFiles = new ArrayList<>((ArrayList<String>)objectIn.readObject());
@@ -201,10 +195,54 @@ public class Main extends Application {
 
 
     public static void main(String[] args) throws IOException{
-        Server startServer = new Server(1200);
-        Thread thread = new Thread(startServer);
-        thread.start();
         launch(args);
+
         startServer.closeServer();
     }
+
+    public class PrelimStage extends Stage{
+        Button _conBtn;
+        private TextField _address;
+        private TextField _port;
+        private CheckBox _serverCreateCheck;
+
+        PrelimStage(){
+            this.setTitle("Address and Port");
+            GridPane layout2 = new GridPane();
+            _conBtn = new Button("Connect");
+            _address = new TextField();
+            _address.setPromptText("Specify Address");
+
+            _port = new TextField();
+            _port.setPromptText("Specify Port");
+
+            _serverCreateCheck = new CheckBox();
+            _serverCreateCheck.setText("Create new Server on Startup");
+            _serverCreateCheck.setSelected(true);
+
+            layout2.add(_address,0,0);
+            layout2.add(_port,0,1);
+            layout2.add(_conBtn,0,2);
+            layout2.add(_serverCreateCheck,0,3);
+            _conBtn.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    port = Integer.parseInt(_port.getText());
+                    address = _address.getText();
+                    serverCreateCheck = _serverCreateCheck.isSelected();
+                }
+            });
+
+            Scene scene = new Scene(layout2, 900, 500);
+            this.setScene(scene);
+            this.show();
+
+        }
+
+
+
+
+    }
 }
+
+
