@@ -1,5 +1,6 @@
 package sample;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -216,8 +217,19 @@ public class Main extends Application {
             btn2.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    fileToDownload = list2.getSelectionModel().getSelectedItem();
                     // TODO download(fileToDownload)
+                    fileToDownload = list2.getSelectionModel().getSelectedItem();
+                    try {
+                        Socket socket = new Socket(address, port);
+                        PrintWriter out = new PrintWriter(socket.getOutputStream());
+                        out.println("Download");
+                        out.println(fileToDownload);
+                        out.flush();
+                        out.close();
+                        socket.close();
+                    } catch (IOException e){
+                        e.printStackTrace();
+                    }
                 }
             });
 
@@ -230,6 +242,10 @@ public class Main extends Application {
                         System.out.println(address);
                         Socket socket = new Socket(address, port);
                         objectIn = new ObjectInputStream(socket.getInputStream());
+                        PrintWriter out = new PrintWriter(socket.getOutputStream());
+                        out.println("DIR");
+                        out.flush();
+                        out.close();
                         try {
                             serverFiles = new ArrayList<>((ArrayList<String>)objectIn.readObject());
                         } catch (Exception e1){

@@ -15,6 +15,7 @@ public class ClientConnectHandler implements Runnable{
     private ObjectInputStream objectIn;
     private String path;
     private ObjectOutputStream objectOut;
+    private String selection = "";
 
 
     public ClientConnectHandler(Socket socket, String path) throws IOException{
@@ -25,32 +26,27 @@ public class ClientConnectHandler implements Runnable{
     @Override
     public void run(){
         try{
-            String selection = "";
-
             // Serializes an array of files name and sends it back to client
-            sendFileNames();
-
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream()));
+            String selection = in.readLine();
+            in.close();
 
             switch(selection) {
                 case "Upload":
                     // TODO Setup Upload
                     break;
                 case "Download":
-                    // TODO Setup Download
+                    sendFiles();
                     break;
+                case "DIR":
+                    sendFileNames();
                 default:
                     break;
             }
 
         } catch (Exception e){
             e.printStackTrace();
-        } finally {
-            try {
-                socket.close();
-            } catch (IOException e){
-                System.err.println("Error");
-                e.printStackTrace();
-            }
         }
     }
     private void sendFileNames() throws IOException{
@@ -66,8 +62,12 @@ public class ClientConnectHandler implements Runnable{
 
     private void sendFiles() throws IOException{
         // TODO Setup Download
+        String line;
+        while ((line = in.readLine()) != null){
+            if (line == "Download") {
+                selection = line;
+            }
+        }
+        System.out.println(line);
     }
-
-
-
 }
