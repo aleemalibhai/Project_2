@@ -59,9 +59,6 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         primaryStage.setTitle("Project 2");
-        Server startServer = new Server(1200);
-        Thread thread = new Thread(startServer);
-        thread.start();
 
         // main display
         BorderPane layout = new BorderPane();
@@ -200,11 +197,14 @@ public class Main extends Application {
                 tables.add(list1,0,0);
             }
         });
-        startServer.closeServer();
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException{
+        Server startServer = new Server(1200);
+        Thread thread = new Thread(startServer);
+        thread.start();
         launch(args);
+        startServer.closeServer();
     }
 }
