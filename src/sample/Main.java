@@ -22,14 +22,16 @@ import java.util.ArrayList;
 
 public class Main extends Application {
 
-    Button _conBtn;
+    private Button _conBtn;
     private TextField _address;
     private TextField _port;
+    private TextField _serverDir;
     private CheckBox _serverCreateCheck;
     private Button btn1;
     private Button btn2;
     private Button btn3;
     private Button btn4;
+    private Button btn5;
     private String address;
     private static int port;
     private static boolean serverCreateCheck = true;
@@ -39,7 +41,12 @@ public class Main extends Application {
 
     public static void main(String[] args) throws IOException{
         launch(args);
-        startServer.closeServer();
+        try{
+            startServer.closeServer()
+            ;
+        } catch (Exception e){
+            System.out.println("no server started");
+        }
     }
 
     public void start(Stage primaryStage){
@@ -50,6 +57,33 @@ public class Main extends Application {
             _address = new TextField();
             _address.setPromptText("Specify Address");
 
+            GridPane dirChooser2 = new GridPane();
+            dirChooser2.setHgap(5);
+            btn5 = new Button("Choose Folder");
+            btn5.setPadding( new Insets(10));
+            _serverDir = new TextField();
+            _serverDir.setPadding(new Insets(10));
+            _serverDir.setPromptText("Choose Server Folder");
+
+            dirChooser2.add(btn5,0,0);
+            dirChooser2.add(_serverDir, 1,0);
+
+            btn5.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+
+                    DirectoryChooser directoryChooser = new DirectoryChooser();
+                    directoryChooser.setInitialDirectory(new File("."));
+                    File file = directoryChooser.showDialog(primaryStage);
+                    if (file == null) {
+                        _serverDir.setText("You didn't select a file path");
+                    } else {
+                        _serverDir.setText(file.getPath());
+                        Server.serverPath = file.getPath();
+                    }
+                }
+            });
+
             _port = new TextField();
             _port.setPromptText("Specify Port");
 
@@ -57,10 +91,13 @@ public class Main extends Application {
             _serverCreateCheck.setText("Create new Server on Startup");
             _serverCreateCheck.setSelected(true);
 
+
             layout2.add(_address,0,0);
             layout2.add(_port,0,1);
             layout2.add(_conBtn,0,2);
             layout2.add(_serverCreateCheck,0,3);
+            layout2.add(dirChooser2,0,4);
+            layout2.setAlignment(Pos.CENTER);
 
             _conBtn.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
@@ -77,7 +114,7 @@ public class Main extends Application {
                 }
             });
 
-            Scene scene = new Scene(layout2, 900, 500);
+            Scene scene = new Scene(layout2, 300, 200);
             primaryStage.setScene(scene);
             primaryStage.show();
         }
@@ -87,7 +124,7 @@ public class Main extends Application {
         private ObservableList<String> fileNames = null;
         private ArrayList<File> files;
         private ArrayList<String> serverFiles;
-        public String path = null;
+        private String path = null;
         private ListView<String> list1 = new ListView<>();
         private ListView<String> list2 = new ListView<>();
         private File fileToUpload;

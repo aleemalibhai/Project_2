@@ -4,6 +4,7 @@ import java.net.*;
 import java.io.*;
 
 public class Server implements Runnable{
+    public static String serverPath;
 
     private ServerSocket serverSocket;
 

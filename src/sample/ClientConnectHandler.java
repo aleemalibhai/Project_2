@@ -13,7 +13,7 @@ public class ClientConnectHandler implements Runnable{
     private BufferedReader in;
     private PrintWriter out;
     private ObjectInputStream objectIn;
-    private String path = "/home/taabish/Desktop/Project_2/Server";
+    private String path = "/home/aleem/Documents/2020/Project_2/Server";
 
 
     public ClientConnectHandler(Socket socket) throws IOException{
