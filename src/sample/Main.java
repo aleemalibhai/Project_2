@@ -92,42 +92,43 @@ public class Main extends Application {
         layout.setAlignment(topLeft, Pos.TOP_LEFT);
 
         //server port and address bars
-        BorderPane bottom = new BorderPane();
+        GridPane bottom = new GridPane();
         GridPane APPane = new GridPane();
         btn3 = new Button("Connect");
+        btn3.setMinWidth(75);
         btn3.setPadding(new Insets(10, 10, 10, 10));
         _address = new TextField();
+        _address.setMinWidth(120);
         _address.setPromptText("Address");
 
-        _port = new TextField();
-        _port.setPromptText("Port");
-
+        APPane.setPadding(new Insets(10));
         APPane.add(_address,1,0);
-        APPane.add(_port,1,1);
         APPane.add(btn3,0,0);
         APPane.setHgap(10);
+        APPane.setVgap(10);
 
         // Adding path button and text field
         GridPane directoryChooser = new GridPane();
         directoryChooser.setPadding(new Insets(10, 10, 10 ,10));
 
         _path = new TextField();
+        _path.setMinWidth(120);
         directoryChooser.add(_path, 1, 0);
-        _path.setMinWidth(300);
         _path.setPromptText("Select the path");
 
         btn4 = new Button("Open File path");
+        btn4.setMinWidth(120);
         btn4.setPadding(new Insets(10, 10, 10, 10));
         directoryChooser.add(btn4, 0, 0);
 
         directoryChooser.setHgap(10);
         directoryChooser.setVgap(10);
 
-        bottom.setLeft(directoryChooser);
-        bottom.setRight(APPane);
+        bottom.add(directoryChooser,0,0);
+        bottom.add(APPane,1,0);
         layout.setBottom(bottom);
 
-        primaryStage.setScene(new Scene(layout, 750, 500));
+        primaryStage.setScene(new Scene(layout, 540, 500));
         primaryStage.show();
 
 
@@ -155,10 +156,9 @@ public class Main extends Application {
             public void handle(ActionEvent event) {
                 // TODO implement connection
                 try {
-                    int port = Integer.parseInt(_port.getText());
                     String address = _address.getText();
                     System.out.println(address);
-                    Socket socket = new Socket(address, port);
+                    Socket socket = new Socket(address, 1200);
                     objectIn = new ObjectInputStream(socket.getInputStream());
                     try {
                         serverFiles = new ArrayList<>((ArrayList<String>)objectIn.readObject());
