@@ -54,6 +54,7 @@ public class Main extends Application {
             primaryStage.setTitle("Address and Port");
             GridPane layout2 = new GridPane();
             _conBtn = new Button("Connect");
+            _conBtn.setPadding(new Insets(5));
             _address = new TextField();
             _address.setPromptText("Specify Address");
 
@@ -76,7 +77,7 @@ public class Main extends Application {
                     directoryChooser.setInitialDirectory(new File("."));
                     File file = directoryChooser.showDialog(primaryStage);
                     if (file == null) {
-                        _serverDir.setText("You didn't select a file path");
+                        _serverDir.setText("You didn't select a path");
                     } else {
                         _serverDir.setText(file.getPath());
                         Server.serverPath = file.getPath();
