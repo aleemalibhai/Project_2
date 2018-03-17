@@ -1,5 +1,6 @@
 package sample;
 
+import com.sun.org.apache.xml.internal.resolver.readers.ExtendedXMLCatalogReader;
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -40,11 +41,10 @@ public class Main extends Application {
     private static Server startServer;
 
 
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args){
         launch(args);
         try{
-            startServer.closeServer()
-            ;
+            startServer.closeServer();
         } catch (Exception e){
             System.out.println("no server started");
         }
@@ -73,7 +73,6 @@ public class Main extends Application {
             btn5.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-
                     DirectoryChooser directoryChooser = new DirectoryChooser();
                     directoryChooser.setInitialDirectory(new File("."));
                     File file = directoryChooser.showDialog(primaryStage);
@@ -129,10 +128,12 @@ public class Main extends Application {
         private String path = null;
         private ListView<String> list1 = new ListView<>();
         private ListView<String> list2 = new ListView<>();
-        private File fileToUpload;
+        private String fileToUpload;
         private String fileToDownload;
         private ObjectInputStream objectIn;
         private Stage secondStage = this;
+        private GridPane tables;
+        private GridPane bottom;
 
         SecondStage() throws IOException{
             if(serverCreateCheck){
@@ -147,7 +148,7 @@ public class Main extends Application {
             layout.setPadding(new Insets(10));
 
             //gridpane for the two List views
-            GridPane tables = new GridPane();
+            tables = new GridPane();
             tables.setPadding(new Insets(10));
             tables.setHgap(10);
             tables.setVgap(10);
@@ -174,7 +175,7 @@ public class Main extends Application {
             layout.setAlignment(topLeft, Pos.TOP_LEFT);
 
             //server port and address bars
-            GridPane bottom = new GridPane();
+            bottom = new GridPane();
             btn3 = new Button("Connect");
             btn3.setMinWidth(75);
             btn3.setPadding(new Insets(10, 10, 10, 10));
@@ -209,8 +210,29 @@ public class Main extends Application {
             btn1.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    fileToUpload = files.get(list1.getSelectionModel().getSelectedIndex());
                     // TODO upload(fileToUpload)
+                    fileToUpload = list1.getSelectionModel().getSelectedItem();
+                    try {
+                        Socket socket = new Socket(address, port);
+                        PrintWriter out = new PrintWriter(socket.getOutputStream());
+                        out.println("Upload");
+                        out.println(fileToUpload);
+                        BufferedReader input = new BufferedReader(new FileReader(path + "/" + fileToUpload));
+                        int c;
+                        ArrayList<Character> ch = new ArrayList<>();
+                        while ((c = input.read()) != -1) {
+                            ch.add((char) c);
+                        }
+                        for(int i = 0; i<ch.size(); i++){
+                            out.print(ch.get(i));
+                        }
+                        out.flush();
+                        socket.shutdownOutput();
+                        input.close();
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+                    connect();
                 }
             });
             //download
@@ -225,8 +247,20 @@ public class Main extends Application {
                         out.println("Download");
                         out.println(fileToDownload);
                         out.flush();
-                        out.close();
+                        socket.shutdownOutput();
+                        BufferedReader in = new BufferedReader(
+                                new InputStreamReader(socket.getInputStream()));
+                        PrintWriter outFile = new PrintWriter(path + "/" + fileToDownload);
+                        String line;
+                        while ((line = in.readLine()) != null) {
+                            outFile.println(line);
+                        }
+                        outFile.flush();
+                        outFile.close();
+                        socket.shutdownInput();
                         socket.close();
+                        list1 = new ListView<>(getLocalFiles(path));
+                        tables.add(list1,0,0);
                     } catch (IOException e){
                         e.printStackTrace();
                     }
@@ -238,26 +272,9 @@ public class Main extends Application {
                 @Override
                 public void handle(ActionEvent event) {
                     // TODO implement connection
-                    try {
-                        System.out.println(address);
-                        Socket socket = new Socket(address, port);
-
-                        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                        out.write("DIR");
-                        out.flush();
-                        socket.shutdownOutput();
-                        objectIn = new ObjectInputStream(socket.getInputStream());
-                        try {
-                            serverFiles = new ArrayList<>((ArrayList<String>)objectIn.readObject());
-                        } catch (Exception e1){
-                            e1.printStackTrace();
-                        }
-                        list2 = new ListView<>(FXCollections.observableArrayList(serverFiles));
-                        tables.add(list2,1,0);
-                        objectIn.close();
-                        socket.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    connect();
+                    if(btn3.getText() == "Connect") {
+                        btn3.setText("Refresh");
                     }
                 }
             });
@@ -297,6 +314,27 @@ public class Main extends Application {
                 this.fileNames.add(file.getName());
             }
             return this.fileNames;
+        }
+        public void connect(){
+            try {
+                Socket socket = new Socket(address, port);
+                PrintWriter out = new PrintWriter(socket.getOutputStream());
+                out.println("DIR");
+                out.flush();
+                socket.shutdownOutput();
+                objectIn = new ObjectInputStream(socket.getInputStream());
+                try {
+                    serverFiles = new ArrayList<>((ArrayList<String>)objectIn.readObject());
+                } catch (Exception e1){
+                    e1.printStackTrace();
+                }
+                list2 = new ListView<>(FXCollections.observableArrayList(serverFiles));
+                tables.add(list2,1,0);
+                objectIn.close();
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
     }
