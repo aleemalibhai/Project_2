@@ -1,24 +1,18 @@
 package sample;
 
-import com.sun.org.apache.xml.internal.resolver.readers.ExtendedXMLCatalogReader;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.stage.DirectoryChooser;
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
-
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -52,7 +46,6 @@ public class Main extends Application {
     }
 
     public void start(Stage primaryStage){
-            Stage secondaryStage = null;
             primaryStage.setTitle("Address and Port");
             GridPane layout2 = new GridPane();
             _conBtn = new Button("Connect");
@@ -273,6 +266,8 @@ public class Main extends Application {
             }
             return this.fileNames;
         }
+
+        // Connects to server and receives a list of file names located on the server
         public void connect(){
             try {
                 Socket socket = new Socket(address, port);
@@ -295,6 +290,10 @@ public class Main extends Application {
             }
         }
 
+        /*
+            Connects to the server and receives character by character data
+            and prints the data to a File.
+        */
         public void download(){
             fileToDownload = list2.getSelectionModel().getSelectedItem();
             if (fileToDownload == null){

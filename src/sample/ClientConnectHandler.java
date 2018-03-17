@@ -7,7 +7,6 @@ import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class ClientConnectHandler implements Runnable{
 

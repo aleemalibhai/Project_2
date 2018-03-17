@@ -38,7 +38,7 @@ public class Server implements Runnable{
             try {
                 serverSocket.close();
             } catch (IOException e1){
-                e.printStackTrace();
+                e1.printStackTrace();
             }
         }
     }
