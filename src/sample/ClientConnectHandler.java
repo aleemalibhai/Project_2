@@ -2,6 +2,7 @@ package sample;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.net.*;
 import java.io.*;
@@ -19,11 +20,13 @@ public class ClientConnectHandler implements Runnable{
     private String selection = "";
     private File file;
     private Scanner input;
+    private ArrayList<String> fileNames;
 
 
     public ClientConnectHandler(Socket socket, String path) throws IOException{
         this.socket = socket;
         this.path = path;
+        this.fileNames = new ArrayList<>();
     }
 
     @Override
@@ -36,7 +39,6 @@ public class ClientConnectHandler implements Runnable{
 
             switch(selection) {
                 case "Upload":
-                    // TODO Setup Upload
                     receiveFiles();
                     break;
                 case "Download":
@@ -61,16 +63,21 @@ public class ClientConnectHandler implements Runnable{
     private void sendFileNames() throws IOException{
         socket.shutdownInput();
         objectOut = new ObjectOutputStream(this.socket.getOutputStream());
-        objectOut.writeObject(new SerializableFile(this.path).getServerFiles());
+        File folder = new File(path);
+        for (File file : folder.listFiles()) {
+            this.fileNames.add(file.getName());
+        }
+        objectOut.writeObject(this.fileNames);
         objectOut.close();
     }
 
     private void receiveFiles() throws IOException{
-        // TODO Setup Upload
         PrintWriter outFile = new PrintWriter(path + "/" + in.readLine());
-        String line;
-        while ((line = in.readLine()) != null) {
-            outFile.println(line);
+        int c;
+        char ch;
+        while ((c = in.read()) != -1) {
+            ch = (char) c;
+            outFile.print(ch);
         }
         outFile.flush();
         outFile.close();
@@ -78,22 +85,17 @@ public class ClientConnectHandler implements Runnable{
     }
 
     private void sendFiles() throws IOException{
-        // TODO Setup Download
-        socket.shutdownInput();
         String fileName = path + "/" + in.readLine();
+        socket.shutdownInput();
         PrintWriter out = new PrintWriter(socket.getOutputStream());
         file = new File(fileName);
         BufferedReader input = new BufferedReader(new FileReader(file));
-
         int c;
-        ArrayList<Character> ch = new ArrayList<>();
+        char ch;
         while ((c = input.read()) != -1) {
-            ch.add((char) c);
+            ch = (char) c;
+            out.print(ch);
         }
-        for(int i = 0; i<ch.size(); i++){
-            out.print(ch.get(i));
-        }
-
         out.flush();
         socket.shutdownOutput();
         input.close();

@@ -17,6 +17,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.stage.DirectoryChooser;
+import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
 import java.io.*;
 import java.net.Socket;
@@ -211,59 +212,16 @@ public class Main extends Application {
                 @Override
                 public void handle(ActionEvent event) {
                     // TODO upload(fileToUpload)
-                    fileToUpload = list1.getSelectionModel().getSelectedItem();
-                    try {
-                        Socket socket = new Socket(address, port);
-                        PrintWriter out = new PrintWriter(socket.getOutputStream());
-                        out.println("Upload");
-                        out.println(fileToUpload);
-                        BufferedReader input = new BufferedReader(new FileReader(path + "/" + fileToUpload));
-                        int c;
-                        ArrayList<Character> ch = new ArrayList<>();
-                        while ((c = input.read()) != -1) {
-                            ch.add((char) c);
-                        }
-                        for(int i = 0; i<ch.size(); i++){
-                            out.print(ch.get(i));
-                        }
-                        out.flush();
-                        socket.shutdownOutput();
-                        input.close();
-                    } catch (Exception e){
-                        e.printStackTrace();
-                    }
-                    connect();
+                    upload();
                 }
             });
+
             //download
             btn2.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
                     // TODO download(fileToDownload)
-                    fileToDownload = list2.getSelectionModel().getSelectedItem();
-                    try {
-                        Socket socket = new Socket(address, port);
-                        PrintWriter out = new PrintWriter(socket.getOutputStream());
-                        out.println("Download");
-                        out.println(fileToDownload);
-                        out.flush();
-                        socket.shutdownOutput();
-                        BufferedReader in = new BufferedReader(
-                                new InputStreamReader(socket.getInputStream()));
-                        PrintWriter outFile = new PrintWriter(path + "/" + fileToDownload);
-                        String line;
-                        while ((line = in.readLine()) != null) {
-                            outFile.println(line);
-                        }
-                        outFile.flush();
-                        outFile.close();
-                        socket.shutdownInput();
-                        socket.close();
-                        list1 = new ListView<>(getLocalFiles(path));
-                        tables.add(list1,0,0);
-                    } catch (IOException e){
-                        e.printStackTrace();
-                    }
+                    download();
                 }
             });
 
@@ -330,13 +288,65 @@ public class Main extends Application {
                 }
                 list2 = new ListView<>(FXCollections.observableArrayList(serverFiles));
                 tables.add(list2,1,0);
-                objectIn.close();
+                socket.shutdownInput();
                 socket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
+        public void download(){
+            fileToDownload = list2.getSelectionModel().getSelectedItem();
+            try {
+                Socket socket = new Socket(address, port);
+                PrintWriter out = new PrintWriter(socket.getOutputStream());
+                out.println("Download");
+                out.println(fileToDownload);
+                out.flush();
+                socket.shutdownOutput();
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(socket.getInputStream()));
+                PrintWriter outFile = new PrintWriter(path + "/" + fileToDownload);
+                int c;
+                char ch;
+                while ((c = in.read()) != -1) {
+                    ch = (char) c;
+                    outFile.print(ch);
+                }
+                outFile.flush();
+                outFile.close();
+                socket.shutdownInput();
+                socket.close();
+                list1 = new ListView<>(getLocalFiles(path));
+                tables.add(list1,0,0);
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+
+        public void upload(){
+            fileToUpload = list1.getSelectionModel().getSelectedItem();
+            try {
+                Socket socket = new Socket(address, port);
+                PrintWriter out = new PrintWriter(socket.getOutputStream());
+                out.println("Upload");
+                out.println(fileToUpload);
+                BufferedReader input = new BufferedReader(new FileReader(path + "/" + fileToUpload));
+                int c;
+                char ch;
+                while ((c = input.read()) != -1) {
+                    ch = (char) c;
+                    out.print(ch);
+                }
+                out.flush();
+                input.close();
+                socket.shutdownOutput();
+                socket.close();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+            connect();
+        }
     }
 }
 

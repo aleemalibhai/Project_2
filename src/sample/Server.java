@@ -34,8 +34,12 @@ public class Server implements Runnable{
                     clientSocket.close();
                 }
             }
-        } catch (IOException e){
-            //
+        } catch (Exception e){
+            try {
+                serverSocket.close();
+            } catch (IOException e1){
+                e.printStackTrace();
+            }
         }
     }
 }
