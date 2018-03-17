@@ -297,55 +297,63 @@ public class Main extends Application {
 
         public void download(){
             fileToDownload = list2.getSelectionModel().getSelectedItem();
-            try {
-                Socket socket = new Socket(address, port);
-                PrintWriter out = new PrintWriter(socket.getOutputStream());
-                out.println("Download");
-                out.println(fileToDownload);
-                out.flush();
-                socket.shutdownOutput();
-                BufferedReader in = new BufferedReader(
-                        new InputStreamReader(socket.getInputStream()));
-                PrintWriter outFile = new PrintWriter(path + "/" + fileToDownload);
-                int c;
-                char ch;
-                while ((c = in.read()) != -1) {
-                    ch = (char) c;
-                    outFile.print(ch);
+            if (fileToDownload == null){
+                System.err.println("Error, no file selected");
+            } else {
+                try {
+                    Socket socket = new Socket(address, port);
+                    PrintWriter out = new PrintWriter(socket.getOutputStream());
+                    out.println("Download");
+                    out.println(fileToDownload);
+                    out.flush();
+                    socket.shutdownOutput();
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(socket.getInputStream()));
+                    PrintWriter outFile = new PrintWriter(path + "/" + fileToDownload);
+                    int c;
+                    char ch;
+                    while ((c = in.read()) != -1) {
+                        ch = (char) c;
+                        outFile.print(ch);
+                    }
+                    outFile.flush();
+                    outFile.close();
+                    socket.shutdownInput();
+                    socket.close();
+                    list1 = new ListView<>(getLocalFiles(path));
+                    tables.add(list1, 0, 0);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                outFile.flush();
-                outFile.close();
-                socket.shutdownInput();
-                socket.close();
-                list1 = new ListView<>(getLocalFiles(path));
-                tables.add(list1,0,0);
-            } catch (IOException e){
-                e.printStackTrace();
             }
         }
 
         public void upload(){
             fileToUpload = list1.getSelectionModel().getSelectedItem();
-            try {
-                Socket socket = new Socket(address, port);
-                PrintWriter out = new PrintWriter(socket.getOutputStream());
-                out.println("Upload");
-                out.println(fileToUpload);
-                BufferedReader input = new BufferedReader(new FileReader(path + "/" + fileToUpload));
-                int c;
-                char ch;
-                while ((c = input.read()) != -1) {
-                    ch = (char) c;
-                    out.print(ch);
+            if (fileToUpload == null){
+                System.err.println("Error, no file selected");
+            } else {
+                try {
+                    Socket socket = new Socket(address, port);
+                    PrintWriter out = new PrintWriter(socket.getOutputStream());
+                    out.println("Upload");
+                    out.println(fileToUpload);
+                    BufferedReader input = new BufferedReader(new FileReader(path + "/" + fileToUpload));
+                    int c;
+                    char ch;
+                    while ((c = input.read()) != -1) {
+                        ch = (char) c;
+                        out.print(ch);
+                    }
+                    out.flush();
+                    input.close();
+                    socket.shutdownOutput();
+                    socket.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                out.flush();
-                input.close();
-                socket.shutdownOutput();
-                socket.close();
-            } catch (Exception e){
-                e.printStackTrace();
+                connect();
             }
-            connect();
         }
     }
 }

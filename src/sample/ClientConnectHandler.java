@@ -13,13 +13,10 @@ public class ClientConnectHandler implements Runnable{
 
     private Socket socket;
     private BufferedReader in;
-    private PrintWriter out;
-    private ObjectInputStream objectIn;
     private String path;
     private ObjectOutputStream objectOut;
     private String selection = "";
     private File file;
-    private Scanner input;
     private ArrayList<String> fileNames;
 
 
@@ -60,6 +57,7 @@ public class ClientConnectHandler implements Runnable{
             }
         }
     }
+    // Accesses the path provide and gets all file names within that folder
     private void sendFileNames() throws IOException{
         socket.shutdownInput();
         objectOut = new ObjectOutputStream(this.socket.getOutputStream());
@@ -71,6 +69,9 @@ public class ClientConnectHandler implements Runnable{
         objectOut.close();
     }
 
+    /* Reads in character by character data sent over the input stream
+       and prints the data in a File.
+    */
     private void receiveFiles() throws IOException{
         PrintWriter outFile = new PrintWriter(path + "/" + in.readLine());
         int c;
@@ -84,12 +85,14 @@ public class ClientConnectHandler implements Runnable{
         socket.shutdownInput();
     }
 
+    /* Reads data from a file and send its to the output stream
+       character by character.
+     */
     private void sendFiles() throws IOException{
         String fileName = path + "/" + in.readLine();
         socket.shutdownInput();
         PrintWriter out = new PrintWriter(socket.getOutputStream());
-        file = new File(fileName);
-        BufferedReader input = new BufferedReader(new FileReader(file));
+        BufferedReader input = new BufferedReader(new FileReader(new File(fileName)));
         int c;
         char ch;
         while ((c = input.read()) != -1) {
