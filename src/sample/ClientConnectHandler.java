@@ -1,9 +1,5 @@
 package sample;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
-
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -15,7 +11,6 @@ public class ClientConnectHandler implements Runnable{
     private String path;
     private ObjectOutputStream objectOut;
     private String selection = "";
-    private File file;
     private ArrayList<String> fileNames;
 
 
@@ -28,7 +23,6 @@ public class ClientConnectHandler implements Runnable{
     @Override
     public void run(){
         try{
-            // Serializes an array of files name and sends it back to client
             in = new BufferedReader(
                     new InputStreamReader(socket.getInputStream()));
             selection = in.readLine();

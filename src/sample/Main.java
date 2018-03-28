@@ -13,6 +13,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.stage.DirectoryChooser;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -34,9 +36,22 @@ public class Main extends Application {
     private static boolean serverCreateCheck = true;
     private TextField _path;
     private static Server startServer;
+    private static String commandArg = null;
+    private static String commandFile = null;
 
 
     public static void main(String[] args){
+        if (args.length > 0) {
+            if (!args[0].isEmpty()) {
+                commandArg = args[0];
+            }
+        }
+        if (args.length > 1) {
+            if (!args[1].isEmpty()) {
+                commandFile = args[1];
+            }
+        }
+
         launch(args);
         try{
             startServer.closeServer();
@@ -198,6 +213,18 @@ public class Main extends Application {
             secondStage.setScene(new Scene(layout, 540, 500));
             secondStage.show();
 
+            if (commandArg != null) {
+                commandArg = commandArg.toLowerCase();
+                if (commandArg.equals("upload")) {
+                    upload(commandFile);
+                    connect();
+                } else if (commandArg.equals("download")) {
+                    download(commandFile);
+                } else if (commandArg.equals("dir")) {
+                    connect();
+                }
+            }
+
 
             // buttons
             // upload
@@ -205,7 +232,8 @@ public class Main extends Application {
                 @Override
                 public void handle(ActionEvent event) {
                     // TODO upload(fileToUpload)
-                    upload();
+                    fileToUpload = list1.getSelectionModel().getSelectedItem();
+                    upload(fileToUpload);
                 }
             });
 
@@ -214,7 +242,8 @@ public class Main extends Application {
                 @Override
                 public void handle(ActionEvent event) {
                     // TODO download(fileToDownload)
-                    download();
+                    fileToDownload = list2.getSelectionModel().getSelectedItem();
+                    download(fileToDownload);
                 }
             });
 
@@ -224,9 +253,6 @@ public class Main extends Application {
                 public void handle(ActionEvent event) {
                     // TODO implement connection
                     connect();
-                    if(btn3.getText() == "Connect") {
-                        btn3.setText("Refresh");
-                    }
                 }
             });
 
@@ -240,7 +266,7 @@ public class Main extends Application {
                     File file = directoryChooser.showDialog(secondStage);
                     if (file == null) {
                         _path.setText("");
-                        _path.setText("You didn't select a file path");
+                        System.err.println("You didn't select a file path");
                         list1 = new ListView<>();
                     } else {
                         _path.setText("");
@@ -285,6 +311,9 @@ public class Main extends Application {
                 tables.add(list2,1,0);
                 socket.shutdownInput();
                 socket.close();
+                if(btn3.getText() == "Connect") {
+                    btn3.setText("Refresh");
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -294,21 +323,30 @@ public class Main extends Application {
             Connects to the server and receives character by character data
             and prints the data to a File.
         */
-        public void download(){
-            fileToDownload = list2.getSelectionModel().getSelectedItem();
-            if (fileToDownload == null){
+        public void download(String fileDownload){
+            if (fileDownload == null){
                 System.err.println("Error, no file selected");
             } else {
                 try {
+                    String wholePath;
+                    ArrayList<String> splitter = new ArrayList<>();
+                    for (String retrieval: fileDownload.split("/")){
+                        splitter.add(retrieval);
+                    }
                     Socket socket = new Socket(address, port);
                     PrintWriter out = new PrintWriter(socket.getOutputStream());
                     out.println("Download");
-                    out.println(fileToDownload);
+                    out.println(splitter.get(splitter.size() - 1));
                     out.flush();
                     socket.shutdownOutput();
                     BufferedReader in = new BufferedReader(
                             new InputStreamReader(socket.getInputStream()));
-                    PrintWriter outFile = new PrintWriter(path + "/" + fileToDownload);
+                    if (path != null){
+                        wholePath = path + "/" + fileDownload;
+                    } else {
+                        wholePath = fileDownload;
+                    }
+                    PrintWriter outFile = new PrintWriter(wholePath);
                     int c;
                     char ch;
                     while ((c = in.read()) != -1) {
@@ -319,7 +357,8 @@ public class Main extends Application {
                     outFile.close();
                     socket.shutdownInput();
                     socket.close();
-                    list1 = new ListView<>(getLocalFiles(path));
+                    String pathSplit = wholePath.replaceAll("/" + splitter.get(splitter.size() - 1), "");
+                    list1 = new ListView<>(getLocalFiles(pathSplit));
                     tables.add(list1, 0, 0);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -327,17 +366,26 @@ public class Main extends Application {
             }
         }
 
-        public void upload(){
-            fileToUpload = list1.getSelectionModel().getSelectedItem();
-            if (fileToUpload == null){
+        public void upload(String fileUpload){
+            if (fileUpload == null){
                 System.err.println("Error, no file selected");
             } else {
                 try {
+                    String wholePath;
+                    ArrayList<String> splitter = new ArrayList<>();
+                    for (String retrieval: fileUpload.split("/")){
+                        splitter.add(retrieval);
+                    }
                     Socket socket = new Socket(address, port);
                     PrintWriter out = new PrintWriter(socket.getOutputStream());
                     out.println("Upload");
-                    out.println(fileToUpload);
-                    BufferedReader input = new BufferedReader(new FileReader(path + "/" + fileToUpload));
+                    out.println(splitter.get(splitter.size() - 1));
+                    if (path != null){
+                        wholePath = path + "/" + fileUpload;
+                    } else {
+                        wholePath = fileUpload;
+                    }
+                    BufferedReader input = new BufferedReader(new FileReader(wholePath));
                     int c;
                     char ch;
                     while ((c = input.read()) != -1) {
